@@ -10,7 +10,7 @@ const fallbackMaterials = [
     nombre: "Jazmin Sambac",
     familia: "Floral",
     intensidad: 9,
-    descripcion: "Corazon floral opulento con textura cremosa y un fondo ligeramente frutal.",
+    descripcion: "Corazón floral opulento con textura cremosa y un fondo ligeramente frutal.",
     descriptores: ["blanco", "cremoso", "sensual"]
   },
   {

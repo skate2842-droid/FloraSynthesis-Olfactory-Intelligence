@@ -49,7 +49,7 @@
         <section class="sidebar-panel" aria-labelledby="workspace-title">
           <p id="workspace-title">Workspace</p>
           <strong>Biblioteca olfativa inicial</strong>
-          <span>Explora perfiles, familias y niveles de intensidad.</span>
+          <span>Conecta materias primas, familias y composiciones en un solo espacio.</span>
         </section>
       </aside>
 
@@ -60,48 +60,108 @@
             <h1>FloraSynthesis Olfactory Intelligence</h1>
           </div>
 
-          <form class="search" role="search">
-            <label class="sr-only" for="searchInput">Buscar materias primas</label>
-            <span aria-hidden="true">⌕</span>
-            <input
-              id="searchInput"
-              type="search"
-              placeholder="Buscar por nombre, familia o descriptor"
-              autocomplete="off"
-            />
-          </form>
+          <div class="topbar-actions">
+            <button class="ghost-button small" type="button">Nueva formulación</button>
+            <form class="search" role="search">
+              <label class="sr-only" for="searchInput">Buscar materias primas</label>
+              <span aria-hidden="true">⌕</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Buscar por nombre, familia o descriptor"
+                autocomplete="off"
+              />
+            </form>
+          </div>
         </header>
 
         <main class="main-content">
+          <section class="hero-panel" aria-label="Resumen ejecutivo">
+            <div>
+              <p class="eyebrow">Diseño sensorial premium</p>
+              <h2>Construye experiencias aromáticas con precisión, inspiración y velocidad.</h2>
+              <p>Visualiza perfiles olfativos, identifica patrones y acelera la formulación con una vista general elegante y operativa.</p>
+              <div class="hero-actions">
+                <a class="primary-button" href="#materials-title">Explorar biblioteca</a>
+                <a class="secondary-button" href="#">Ver roadmap</a>
+              </div>
+            </div>
+            <div class="hero-badges" aria-label="Indicadores principales">
+              <span>+24% innovación</span>
+              <span>IA assistida</span>
+              <span>Insights en tiempo real</span>
+            </div>
+          </section>
+
           <section class="overview-grid" aria-label="Resumen">
-            <article class="overview-card">
-              <span>Materias primas</span>
+            <article class="overview-card accent">
+              <div class="card-head">
+                <span>Materias primas</span>
+                <span class="card-chip">Live</span>
+              </div>
               <strong id="totalMaterials">0</strong>
               <small>Disponibles en biblioteca</small>
             </article>
             <article class="overview-card">
-              <span>Familias</span>
+              <div class="card-head">
+                <span>Familias</span>
+                <span class="card-chip soft">Aroma</span>
+              </div>
               <strong id="totalFamilies">0</strong>
-              <small>Clasificacion aromatica</small>
+              <small>Clasificación aromática</small>
             </article>
             <article class="overview-card">
-              <span>Intensidad media</span>
+              <div class="card-head">
+                <span>Intensidad media</span>
+                <span class="card-chip soft">Sensory</span>
+              </div>
               <strong id="averageIntensity">0.0</strong>
               <small>Escala sensorial 1-10</small>
             </article>
           </section>
 
-          <section class="content-section" aria-labelledby="materials-title">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">Raw materials</p>
-                <h2 id="materials-title">Explorador de materias primas</h2>
+          <section class="content-grid" aria-label="Panel principal">
+            <div class="panel-card" aria-labelledby="materials-title">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Raw materials</p>
+                  <h2 id="materials-title">Explorador de materias primas</h2>
+                </div>
+                <button class="ghost-button" type="button" id="resetSearch">Limpiar</button>
               </div>
-              <button class="ghost-button" type="button" id="resetSearch">Limpiar</button>
+
+              <div class="materials-grid" id="materialsGrid" aria-live="polite"></div>
+              <p class="empty-state" id="emptyState" hidden>No hay resultados para la búsqueda actual.</p>
             </div>
 
-            <div class="materials-grid" id="materialsGrid" aria-live="polite"></div>
-            <p class="empty-state" id="emptyState" hidden>No hay resultados para la busqueda actual.</p>
+            <aside class="side-stack" aria-label="Indicadores complementarios">
+              <article class="panel-card compact">
+                <p class="eyebrow">Ruta de desarrollo</p>
+                <h3>Progreso de formulación</h3>
+                <div class="progress-item">
+                  <div class="progress-label">Acorde base</div>
+                  <div class="progress-bar"><i style="width: 82%"></i></div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-label">Fijación</div>
+                  <div class="progress-bar"><i style="width: 64%"></i></div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-label">Validación sensorial</div>
+                  <div class="progress-bar"><i style="width: 91%"></i></div>
+                </div>
+              </article>
+
+              <article class="panel-card compact">
+                <p class="eyebrow">Observaciones</p>
+                <h3>Perfiles destacados</h3>
+                <ul class="insight-list">
+                  <li><strong>Jazmín Sambac</strong><span>Floral, cremoso y profundo.</span></li>
+                  <li><strong>Bergamota Calabria</strong><span>Ágil, fresca y brillante.</span></li>
+                  <li><strong>Cedro Virginia</strong><span>Estructura, calidez y estabilidad.</span></li>
+                </ul>
+              </article>
+            </aside>
           </section>
         </main>
       </div>
