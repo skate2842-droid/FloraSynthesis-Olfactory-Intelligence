@@ -1,0 +1,143 @@
+const fallbackMaterials = [
+  {
+    nombre: "Bergamota Calabria",
+    familia: "Citrica",
+    intensidad: 7,
+    descripcion: "Salida luminosa, fresca y elegante con facetas verdes y florales.",
+    descriptores: ["chispeante", "verde", "limpia"]
+  },
+  {
+    nombre: "Jazmin Sambac",
+    familia: "Floral",
+    intensidad: 9,
+    descripcion: "Corazon floral opulento con textura cremosa y un fondo ligeramente frutal.",
+    descriptores: ["blanco", "cremoso", "sensual"]
+  },
+  {
+    nombre: "Cedro Virginia",
+    familia: "Amaderada",
+    intensidad: 6,
+    descripcion: "Madera seca, limpia y estructural ideal para fijar composiciones modernas.",
+    descriptores: ["seco", "lapiz", "elegante"]
+  }
+];
+
+const state = {
+  materials: [],
+  query: ""
+};
+
+const materialsGrid = document.querySelector("#materialsGrid");
+const emptyState = document.querySelector("#emptyState");
+const searchInput = document.querySelector("#searchInput");
+const resetSearch = document.querySelector("#resetSearch");
+const totalMaterials = document.querySelector("#totalMaterials");
+const totalFamilies = document.querySelector("#totalFamilies");
+const averageIntensity = document.querySelector("#averageIntensity");
+
+async function loadMaterials() {
+  try {
+    const response = await fetch("data/materias-primas.json");
+
+    if (!response.ok) {
+      throw new Error("No se pudo cargar la biblioteca");
+    }
+
+    state.materials = await response.json();
+  } catch (error) {
+    state.materials = fallbackMaterials;
+  }
+
+  updateDashboard();
+  renderMaterials();
+}
+
+function updateDashboard() {
+  const families = new Set(state.materials.map((material) => material.familia));
+  const intensityTotal = state.materials.reduce((total, material) => total + material.intensidad, 0);
+  const average = state.materials.length ? intensityTotal / state.materials.length : 0;
+
+  totalMaterials.textContent = state.materials.length;
+  totalFamilies.textContent = families.size;
+  averageIntensity.textContent = average.toFixed(1);
+}
+
+function normalizeText(value) {
+  return value
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function getFilteredMaterials() {
+  const query = normalizeText(state.query.trim());
+
+  if (!query) {
+    return state.materials;
+  }
+
+  return state.materials.filter((material) => {
+    const searchable = [
+      material.nombre,
+      material.familia,
+      material.descripcion,
+      ...material.descriptores
+    ].join(" ");
+
+    return normalizeText(searchable).includes(query);
+  });
+}
+
+function renderMaterials() {
+  const materials = getFilteredMaterials();
+
+  materialsGrid.innerHTML = materials.map(createMaterialCard).join("");
+  emptyState.hidden = materials.length > 0;
+}
+
+function createMaterialCard(material) {
+  const tags = material.descriptores
+    .map((descriptor) => `<li>${descriptor}</li>`)
+    .join("");
+  const intensityWidth = Math.min(material.intensidad * 10, 100);
+
+  return `
+    <article class="material-card">
+      <header>
+        <div>
+          <span>Materia prima</span>
+          <h3>${material.nombre}</h3>
+        </div>
+        <strong class="family-badge">${material.familia}</strong>
+      </header>
+      <p class="description">${material.descripcion}</p>
+      <ul class="profile-tags" aria-label="Descriptores olfativos">
+        ${tags}
+      </ul>
+      <div class="intensity" aria-label="Intensidad ${material.intensidad} de 10">
+        <div class="intensity-row">
+          <span>Intensidad</span>
+          <span>${material.intensidad}/10</span>
+        </div>
+        <div class="intensity-bar" aria-hidden="true">
+          <i style="width: ${intensityWidth}%"></i>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+searchInput.addEventListener("input", (event) => {
+  state.query = event.target.value;
+  renderMaterials();
+});
+
+resetSearch.addEventListener("click", () => {
+  state.query = "";
+  searchInput.value = "";
+  searchInput.focus();
+  renderMaterials();
+});
+
+loadMaterials();

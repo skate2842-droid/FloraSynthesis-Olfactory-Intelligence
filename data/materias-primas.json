@@ -1,0 +1,44 @@
+[
+  {
+    "nombre": "Bergamota Calabria",
+    "familia": "Citrica",
+    "intensidad": 7,
+    "descripcion": "Salida luminosa, fresca y elegante con facetas verdes y florales.",
+    "descriptores": ["chispeante", "verde", "limpia"]
+  },
+  {
+    "nombre": "Jazmin Sambac",
+    "familia": "Floral",
+    "intensidad": 9,
+    "descripcion": "Corazon floral opulento con textura cremosa y un fondo ligeramente frutal.",
+    "descriptores": ["blanco", "cremoso", "sensual"]
+  },
+  {
+    "nombre": "Cedro Virginia",
+    "familia": "Amaderada",
+    "intensidad": 6,
+    "descripcion": "Madera seca, limpia y estructural ideal para fijar composiciones modernas.",
+    "descriptores": ["seco", "lapiz", "elegante"]
+  },
+  {
+    "nombre": "Vetiver Haiti",
+    "familia": "Terrosa",
+    "intensidad": 8,
+    "descripcion": "Perfil terroso, ahumado y verde con excelente profundidad de fondo.",
+    "descriptores": ["raiz", "ahumado", "mineral"]
+  },
+  {
+    "nombre": "Rosa Damascena",
+    "familia": "Floral",
+    "intensidad": 8,
+    "descripcion": "Rosa natural, rica y melosa con matices especiados y ligeramente citricos.",
+    "descriptores": ["petalo", "miel", "especiada"]
+  },
+  {
+    "nombre": "Ambroxan",
+    "familia": "Ambarada",
+    "intensidad": 7,
+    "descripcion": "Firma ambarada moderna con volumen, persistencia y efecto piel limpia.",
+    "descriptores": ["ambar", "mineral", "difusivo"]
+  }
+]
