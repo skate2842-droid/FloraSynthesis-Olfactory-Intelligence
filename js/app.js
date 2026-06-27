@@ -39,6 +39,9 @@ const appShell = document.querySelector("#appShell");
 const loginForm = document.querySelector("#loginForm");
 const authMessage = document.querySelector("#authMessage");
 const demoButton = document.querySelector("#demoButton");
+const userMenuButton = document.querySelector("#userMenuButton");
+const userMenu = document.querySelector("#userMenu");
+const dropdownStatus = document.querySelector("#dropdownStatus");
 
 async function loadMaterials() {
   try {
@@ -145,6 +148,47 @@ resetSearch.addEventListener("click", () => {
   renderMaterials();
 });
 
+function showLoginView() {
+  loginScreen.classList.remove("is-hidden");
+  appShell.classList.add("is-hidden");
+
+  if (authMessage) {
+    authMessage.textContent = "";
+  }
+
+  if (loginForm) {
+    loginForm.reset();
+  }
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  state.query = "";
+  renderMaterials();
+  closeUserMenu();
+}
+
+function showDashboardView() {
+  loginScreen.classList.add("is-hidden");
+  appShell.classList.remove("is-hidden");
+  closeUserMenu();
+}
+
+function closeUserMenu() {
+  if (userMenu) {
+    userMenu.classList.remove("is-open");
+  }
+
+  if (userMenuButton) {
+    userMenuButton.setAttribute("aria-expanded", "false");
+  }
+
+  if (dropdownStatus) {
+    dropdownStatus.textContent = "";
+  }
+}
+
 if (loginForm) {
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -157,14 +201,39 @@ if (loginForm) {
 
 if (demoButton) {
   demoButton.addEventListener("click", () => {
-    if (loginScreen) {
-      loginScreen.hidden = true;
+    showDashboardView();
+  });
+}
+
+if (userMenuButton && userMenu) {
+  userMenuButton.addEventListener("click", () => {
+    const isOpen = userMenu.classList.toggle("is-open");
+    userMenuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  userMenu.addEventListener("click", (event) => {
+    const action = event.target.closest("button")?.dataset.action;
+
+    if (!action) {
+      return;
     }
 
-    if (appShell) {
-      appShell.hidden = false;
+    if (action === "logout") {
+      showLoginView();
+      return;
+    }
+
+    if (dropdownStatus) {
+      dropdownStatus.textContent = "Disponible en una próxima versión.";
     }
   });
 }
 
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".user-menu")) {
+    closeUserMenu();
+  }
+});
+
+showLoginView();
 loadMaterials();

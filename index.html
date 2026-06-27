@@ -48,7 +48,7 @@
       </div>
     </section>
 
-    <div class="app-shell" id="appShell" hidden>
+    <div class="app-shell is-hidden" id="appShell">
       <aside class="sidebar" aria-label="Navegacion principal">
         <a class="brand" href="#" aria-label="FloraSynthesis Olfactory Intelligence">
           <span class="brand-mark" aria-hidden="true">FS</span>
@@ -107,6 +107,21 @@
                 autocomplete="off"
               />
             </form>
+
+            <div class="user-menu">
+              <button class="user-trigger" id="userMenuButton" type="button" aria-expanded="false" aria-controls="userMenu">
+                <span class="avatar" aria-hidden="true">DV</span>
+                <span class="user-name">Daniel Villacres</span>
+                <span class="menu-caret" aria-hidden="true">▾</span>
+              </button>
+
+              <div class="user-dropdown" id="userMenu" role="menu" aria-label="Menú de usuario">
+                <p class="dropdown-status" id="dropdownStatus" aria-live="polite"></p>
+                <button class="dropdown-item" type="button" data-action="profile">Mi perfil</button>
+                <button class="dropdown-item" type="button" data-action="settings">Configuración</button>
+                <button class="dropdown-item danger" type="button" data-action="logout">Cerrar sesión</button>
+              </div>
+            </div>
           </div>
         </header>
 
