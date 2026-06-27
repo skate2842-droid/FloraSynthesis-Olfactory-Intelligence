@@ -15,6 +15,74 @@
   --radius: 18px;
 }
 
+/* Layout fixes: enforce full-viewport sizing and prevent global scroll
+   - Ensures Safari/Chrome treat the app as a full-viewport single-screen layout
+   - Internal panels handle scrolling (no global body scroll)
+*/
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  overflow: auto; /* allow normal page scrolling for Safari compatibility */
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* App shell should fill the viewport but allow safe-area / Safari fill */
+.app-shell {
+  height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh);
+  height: -webkit-fill-available; /* Safari safe-area */
+  min-height: 0; /* allow children to scroll with flex */
+  overflow: visible; /* allow page scroll when content exceeds viewport */
+}
+
+/* Topbar stays fixed; main content is the flexible scroll area */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  flex: 0 0 auto;
+}
+
+.main-content {
+  flex: 1 1 auto;
+  min-height: 0; /* critical for internal scrolling inside flex children */
+  overflow: auto; /* allow internal scroll when needed */
+}
+
+.materials-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.materials-table-shell {
+  flex: 1 1 auto;
+  min-height: 0; /* ensures this element can shrink and its internal scroll works */
+  overflow: auto; /* internal scrolling for the materials list */
+}
+
+/* Drawer/backdrop Safari compatibility */
+.drawer-backdrop {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.detail-drawer {
+  -webkit-backdrop-filter: none; /* avoid double-backdrop issues */
+}
+
 * {
   box-sizing: border-box;
 }
@@ -256,10 +324,10 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 96px;
+  min-height: 72px;
   border-bottom: 1px solid var(--line);
   background: rgba(245, 250, 247, 0.9);
-  padding: 18px 32px;
+  padding: 12px 20px;
   backdrop-filter: blur(18px);
 }
 
@@ -662,7 +730,7 @@ h2 {
   overflow: auto;
   border: 1px solid rgba(16, 33, 29, 0.08);
   border-radius: 18px;
-  background: #fcfefe;
+  background: #ffffff;
 }
 
 .materials-table {
@@ -673,8 +741,9 @@ h2 {
 .materials-table-head {
   position: sticky;
   top: 0;
-  z-index: 1;
-  background: #f6fbf8;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .materials-table-row {
@@ -686,7 +755,7 @@ h2 {
   padding: 0 16px;
   border-bottom: 1px solid rgba(16, 33, 29, 0.06);
   color: var(--ink);
-  transition: background 180ms ease, transform 180ms ease;
+  transition: background 200ms ease, transform 200ms ease;
 }
 
 .materials-table-row.header {
@@ -697,10 +766,12 @@ h2 {
   color: var(--muted);
 }
 
-.materials-table-row:not(.header):hover,
-.materials-table-row:not(.header).is-selected {
+.materials-table-row:not(.header):hover {
   background: rgba(46, 158, 116, 0.08);
-  cursor: pointer;
+}
+
+.materials-table-row:not(.header).is-selected {
+  background: rgba(46, 158, 116, 0.12);
 }
 
 .materials-cell {
@@ -754,11 +825,11 @@ h2 {
   position: fixed;
   inset: 0;
   z-index: 30;
-  background: rgba(7, 17, 15, 0.48);
-  backdrop-filter: blur(8px);
+  background: rgba(7, 17, 15, 0.38);
+  backdrop-filter: blur(12px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 220ms ease, visibility 220ms ease;
+  transition: opacity 300ms ease, visibility 300ms ease;
 }
 
 .drawer-backdrop.is-open {
@@ -773,12 +844,12 @@ h2 {
   z-index: 31;
   display: flex;
   flex-direction: column;
-  width: min(480px, 100%);
+  width: min(520px, 100%);
   height: 100vh;
-  background: rgba(248, 253, 251, 0.98);
-  box-shadow: -18px 0 40px rgba(3, 22, 19, 0.18);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: -28px 0 80px rgba(3, 22, 19, 0.16);
   transform: translateX(100%);
-  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .detail-drawer.is-open {
@@ -790,7 +861,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 22px 24px 16px;
+  padding: 24px 24px 16px;
   border-bottom: 1px solid rgba(16, 33, 29, 0.08);
 }
 
@@ -799,18 +870,18 @@ h2 {
   overflow: auto;
   padding: 20px 24px 24px;
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .drawer-section {
   border: 1px solid rgba(16, 33, 29, 0.08);
-  border-radius: 16px;
+  border-radius: 18px;
   background: white;
-  padding: 16px;
+  padding: 20px;
 }
 
 .drawer-section h4 {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   font-size: 0.95rem;
   color: var(--accent-strong);
 }
@@ -819,18 +890,18 @@ h2 {
 .drawer-section li {
   margin: 0;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .drawer-meta {
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 
 .drawer-meta .meta-row {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   color: var(--muted);
 }
 
@@ -840,12 +911,12 @@ h2 {
 
 .facet-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .facet-item {
   display: grid;
-  gap: 4px;
+  gap: 8px;
 }
 
 .facet-row {
@@ -857,7 +928,7 @@ h2 {
 }
 
 .facet-bar {
-  height: 8px;
+  height: 10px;
   border-radius: 999px;
   background: rgba(15, 31, 27, 0.08);
   overflow: hidden;
@@ -870,11 +941,6 @@ h2 {
   background: linear-gradient(90deg, var(--accent), var(--teal));
 }
 
-.progress-item {
-  display: grid;
-  gap: 6px;
-  margin-top: 12px;
-}
 
 .progress-label {
   color: var(--muted);
@@ -951,20 +1017,15 @@ h2 {
     min-height: 100vh;
   }
 
-  .sidebar {
-    gap: 20px;
+  .materials-table {
+    min-width: 0;
   }
 
-  .topbar {
-    flex-direction: column;
-    align-items: start;
+  .materials-table-row {
+    grid-template-columns: 46px minmax(140px, 1.4fr) 100px 1fr 58px;
   }
 
-  .topbar-actions {
-    width: 100%;
-  }
-
-  .search {
+  .detail-drawer {
     width: 100%;
   }
 }
@@ -1010,10 +1071,45 @@ h2 {
   }
 }
 
-  display: grid;
-  gap: 14px;
-  min-height: 242px;
-  padding: 18px;
+@media (max-width: 720px) {
+  .auth-card {
+    padding: 24px;
+  }
+
+  .auth-actions {
+    flex-direction: column;
+  }
+
+  .matrix-actions {
+    width: 100%;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .materials-table {
+    min-width: 640px;
+  }
+
+  .materials-table-row {
+    grid-template-columns: 46px minmax(160px, 1.4fr) 100px 1fr 58px;
+  }
+
+  .hero-panel {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .overview-grid,
+  .side-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: start;
+  }
 }
 
 .material-card header {
@@ -1085,7 +1181,7 @@ h2 {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--amber), var(--rose));
+  background: linear-gradient(90deg, var(--accent), var(--teal));
 }
 
 .empty-state {

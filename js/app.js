@@ -317,6 +317,7 @@ function renderDetailDrawer(material) {
       <div class="drawer-meta">
         <div class="meta-row"><span>CAS</span><strong>${material.cas || "N/D"}</strong></div>
         <div class="meta-row"><span>Familia olfativa</span><strong>${material.familiaOlfativa || material.familia || "Sin familia"}</strong></div>
+        <div class="meta-row"><span>Nota principal</span><strong>${material.notaPrincipal || "Sin nota principal"}</strong></div>
         <div class="meta-row"><span>Naturaleza</span><strong>${material.naturaleza || "En evaluación"}</strong></div>
       </div>
     </section>
@@ -477,8 +478,76 @@ if (loginForm) {
 }
 
 if (demoButton) {
-  demoButton.addEventListener("click", () => {
+  demoButton.addEventListener("click", async () => {
+    // Enable demo mode and show dashboard UI
+    setDemoMode(true);
+    setActiveSectionKey('materias');
+    // Show dashboard UI
     showDashboardView();
+
+    // Ensure materials are loaded and UI is rendered.
+    // If materials not yet loaded, load them; otherwise refresh render.
+    try {
+      if (!state.materials || !state.materials.length) {
+        await loadMaterials();
+      } else {
+        updateDashboard();
+        renderMaterials();
+      }
+    } catch (e) {
+      // fallback: render with whatever state is available
+      console.warn('Demo load/render fallback', e);
+      updateDashboard();
+      renderMaterials();
+    }
+
+    // Focus the search input so the user sees the content
+    if (searchInput) {
+      searchInput.focus();
+    }
+  });
+}
+
+// Navigation: ensure clicking side nav items activates section and triggers renders
+{
+  const navItems = document.querySelectorAll('.side-nav .nav-item');
+  navItems.forEach((item) => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      // manage active class
+      navItems.forEach((n) => n.classList.remove('active'));
+      item.classList.add('active');
+
+      const text = (item.textContent || '').trim().toLowerCase();
+      // persist active section
+      if (text.includes('materias')) setActiveSectionKey('materias');
+      else setActiveSectionKey(text.split(' ')[0] || text);
+
+      // If user clicked 'materias primas', ensure materials are loaded and rendered
+      if (text.includes('materias')) {
+        try {
+          if (!state.materials || !state.materials.length) {
+            await loadMaterials();
+          } else {
+            updateDashboard();
+            renderMaterials();
+          }
+        } catch (err) {
+          console.warn('Error loading materials on nav click', err);
+          // fallback render
+          renderMaterials();
+        }
+
+        // scroll to materials section header to ensure visibility in Safari
+        const hdr = document.querySelector('#materials-title');
+        if (hdr && hdr.scrollIntoView) hdr.scrollIntoView({behavior: 'auto', block: 'start'});
+      }
+
+      // If other nav items require actions, keep minimal: close drawer and user menu
+      closeDetailDrawer();
+      closeUserMenu();
+    });
   });
 }
 
@@ -689,6 +758,11 @@ if (userMenuButton && userMenu) {
     }
 
     if (action === "logout") {
+      // clear demo/session info
+      try {
+        localStorage.removeItem('fs_demo');
+        localStorage.removeItem('fs_active');
+      } catch (e) {}
       showLoginView();
       return;
     }
@@ -705,4 +779,56 @@ document.addEventListener("click", (event) => {
   }
 });
 
-showLoginView();
+function setDemoMode(on) {
+  try {
+    if (on) localStorage.setItem('fs_demo', '1');
+    else {
+      localStorage.removeItem('fs_demo');
+      localStorage.removeItem('fs_active');
+    }
+  } catch (e) {}
+}
+
+function setActiveSectionKey(key) {
+  try { localStorage.setItem('fs_active', key); } catch (e) {}
+}
+
+function activateSectionByKey(key) {
+  const navItems = document.querySelectorAll('.side-nav .nav-item');
+  navItems.forEach((n) => n.classList.remove('active'));
+  let matched = false;
+  navItems.forEach((n) => {
+    const txt = (n.textContent || '').trim().toLowerCase();
+    if ((key === 'materias' && txt.includes('materias')) || txt.includes(key)) {
+      n.classList.add('active');
+      matched = true;
+    }
+  });
+
+  // If key is materias ensure materials are rendered
+  if (key === 'materias') {
+    if (!state.materials || !state.materials.length) {
+      return loadMaterials();
+    }
+    updateDashboard();
+    renderMaterials();
+  }
+
+  return Promise.resolve();
+}
+
+async function initAppState() {
+  const demo = localStorage.getItem('fs_demo') === '1';
+  const active = (localStorage.getItem('fs_active') || 'materias').toLowerCase();
+
+  if (demo) {
+    showDashboardView();
+    setDemoMode(true);
+    await activateSectionByKey(active.includes('materias') ? 'materias' : active);
+  } else {
+    showLoginView();
+  }
+}
+
+// Initialize app state on load
+initAppState();
