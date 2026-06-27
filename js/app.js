@@ -1,7 +1,7 @@
 const fallbackMaterials = [
   {
     nombre: "Bergamota Calabria",
-    familia: "Citrica",
+    familia: "Cítrica",
     intensidad: 7,
     descripcion: "Salida luminosa, fresca y elegante con facetas verdes y florales.",
     descriptores: ["chispeante", "verde", "limpia"]
@@ -25,7 +25,8 @@ const fallbackMaterials = [
 const state = {
   materials: [],
   query: "",
-  matrixRows: []
+  matrixRows: [],
+  selectedMaterial: null
 };
 
 const materialsGrid = document.querySelector("#materialsGrid");
@@ -47,6 +48,39 @@ const downloadTemplateButton = document.querySelector("#downloadTemplateButton")
 const matrixFileInput = document.querySelector("#matrixFileInput");
 const matrixStatus = document.querySelector("#matrixStatus");
 const matrixPreview = document.querySelector("#matrixPreview");
+const detailDrawer = document.querySelector("#detailDrawer");
+const detailBackdrop = document.querySelector("#detailBackdrop");
+const drawerTitle = document.querySelector("#drawerTitle");
+const drawerContent = document.querySelector("#drawerContent");
+const closeDrawerButton = document.querySelector("#closeDrawerButton");
+
+function normalizeMaterial(material, index = 0) {
+  const family = material.familiaOlfativa || material.familia || "Floral";
+  const facetas = Array.isArray(material.facetas) && material.facetas.length
+    ? material.facetas
+    : (Array.isArray(material.descriptores) ? material.descriptores.map((descriptor, descriptorIndex) => ({
+        nombre: descriptor,
+        porcentaje: Math.max(8, 100 - descriptorIndex * 12)
+      })) : []);
+
+  return {
+    nombre: material.nombre || `Materia prima ${index + 1}`,
+    cas: material.cas || `CAS-${String(index + 1).padStart(3, "0")}`,
+    familiaOlfativa: family,
+    familia: family,
+    notaPrincipal: material.notaPrincipal || material.descripcion || "Perfil en desarrollo",
+    naturaleza: material.naturaleza || "En evaluación",
+    descripcionOlfativa: material.descripcionOlfativa || material.descripcion || "Detalle técnico disponible en modo demo.",
+    facetas,
+    aplicacionRecomendada: material.aplicacionRecomendada || "Aplicación en formulación premium",
+    sustantividad: material.sustantividad || "En evaluación",
+    logP: material.logP || "N/D",
+    comentariosTecnicos: material.comentariosTecnicos || "Información técnica disponible en modo demo.",
+    intensidad: material.intensidad || deriveIntensity(facetas),
+    descripcion: material.descripcionOlfativa || material.descripcion || "Detalle técnico disponible en modo demo.",
+    descriptores: material.descriptores || facetas.map((facet) => facet.nombre).slice(0, 4)
+  };
+}
 
 async function loadMaterials() {
   try {
@@ -56,9 +90,9 @@ async function loadMaterials() {
       throw new Error("No se pudo cargar la biblioteca");
     }
 
-    state.materials = await response.json();
+    state.materials = (await response.json()).map((material, index) => normalizeMaterial(material, index));
   } catch (error) {
-    state.materials = fallbackMaterials;
+    state.materials = fallbackMaterials.map((material, index) => normalizeMaterial(material, index));
   }
 
   updateDashboard();
@@ -94,7 +128,9 @@ function getFilteredMaterials() {
     const searchable = [
       material.nombre,
       material.familia,
-      material.descripcion,
+      material.cas,
+      material.descripcionOlfativa,
+      material.notaPrincipal,
       ...material.descriptores
     ].join(" ");
 
@@ -102,11 +138,40 @@ function getFilteredMaterials() {
   });
 }
 
+function getFamilyColor(family) {
+  const normalizedFamily = String(family || "").trim().toLowerCase();
+  const palette = {
+    floral: "#e91e63",
+    frutal: "#ff8a00",
+    cítrica: "#f4c542",
+    citrica: "#f4c542",
+    verde: "#3cb371",
+    amaderada: "#8d6e63",
+    ambar: "#d4af37",
+    ámbar: "#d4af37",
+    musk: "#8e24aa",
+    especiada: "#b71c1c",
+    herbal: "#6b8e23",
+    gourmand: "#5d4037",
+    marina: "#1e88e5",
+    aldehídica: "#d7d7d7",
+    aldehidica: "#d7d7d7"
+  };
+
+  return palette[normalizedFamily] || "#94a3b8";
+}
+
 function renderMaterials() {
   const materials = getFilteredMaterials();
 
-  materialsGrid.innerHTML = materials.map(createMaterialCard).join("");
-  emptyState.hidden = materials.length > 0;
+  if (!materials.length) {
+    materialsGrid.innerHTML = '<div class="materials-table-row" role="row"><div class="materials-cell" role="cell">No hay resultados</div></div>';
+    emptyState.hidden = false;
+    return;
+  }
+
+  materialsGrid.innerHTML = materials.map((material, index) => createMaterialRow(material, index)).join("");
+  emptyState.hidden = true;
 }
 
 function deriveIntensity(facetas) {
@@ -208,36 +273,106 @@ function renderMatrixPreview(rows = []) {
   `;
 }
 
-function createMaterialCard(material) {
-  const tags = (material.descriptores || [])
-    .map((descriptor) => `<li>${descriptor}</li>`)
-    .join("");
-  const intensityWidth = Math.min((material.intensidad || 6) * 10, 100);
+function createMaterialRow(material, index) {
+  const familyColor = getFamilyColor(material.familiaOlfativa || material.familia);
+  const isSelected = state.selectedMaterial && state.selectedMaterial.nombre === material.nombre && state.selectedMaterial.cas === material.cas;
 
   return `
-    <article class="material-card">
-      <header>
-        <div>
-          <span>Materia prima</span>
-          <h3>${material.nombre}</h3>
-        </div>
-        <strong class="family-badge">${material.familia}</strong>
-      </header>
-      <p class="description">${material.descripcion}</p>
-      <ul class="profile-tags" aria-label="Descriptores olfativos">
-        ${tags}
-      </ul>
-      <div class="intensity" aria-label="Intensidad ${material.intensidad} de 10">
-        <div class="intensity-row">
-          <span>Intensidad</span>
-          <span>${material.intensidad}/10</span>
-        </div>
-        <div class="intensity-bar" aria-hidden="true">
-          <i style="width: ${intensityWidth}%"></i>
-        </div>
+    <div class="materials-table-row ${isSelected ? "is-selected" : ""}" role="row" tabindex="0" data-material-index="${index}">
+      <div class="materials-cell color-cell" role="cell" aria-label="Color de familia">
+        <span class="color-dot" style="background:${familyColor}"></span>
       </div>
-    </article>
+      <div class="materials-cell name-cell" role="cell">${material.nombre}</div>
+      <div class="materials-cell cas-cell" role="cell">${material.cas || "N/D"}</div>
+      <div class="materials-cell family-cell" role="cell">${material.familiaOlfativa || material.familia || "Sin familia"}</div>
+      <div class="materials-cell detail-cell" role="cell">
+        <button class="detail-toggle" type="button" aria-label="Ver detalle de ${material.nombre}">↗</button>
+      </div>
+    </div>
   `;
+}
+
+function renderDetailDrawer(material) {
+  if (!material) {
+    drawerTitle.textContent = "Materia prima";
+    drawerContent.innerHTML = "";
+    return;
+  }
+
+  const facetasMarkup = (material.facetas || []).length
+    ? `<div class="facet-list">${(material.facetas || []).map((facet) => `
+        <div class="facet-item">
+          <div class="facet-row">
+            <span>${facet.nombre}</span>
+            <strong>${facet.porcentaje}%</strong>
+          </div>
+          <div class="facet-bar"><i style="width:${Math.min(100, facet.porcentaje || 0)}%"></i></div>
+        </div>
+      `).join("")}</div>`
+    : "<p>No hay facetas registradas.</p>";
+
+  drawerTitle.textContent = material.nombre;
+  drawerContent.innerHTML = `
+    <section class="drawer-section">
+      <div class="drawer-meta">
+        <div class="meta-row"><span>CAS</span><strong>${material.cas || "N/D"}</strong></div>
+        <div class="meta-row"><span>Familia olfativa</span><strong>${material.familiaOlfativa || material.familia || "Sin familia"}</strong></div>
+        <div class="meta-row"><span>Naturaleza</span><strong>${material.naturaleza || "En evaluación"}</strong></div>
+      </div>
+    </section>
+
+    <section class="drawer-section">
+      <h4>Descripción olfativa</h4>
+      <p>${material.descripcionOlfativa || "Sin descripción disponible."}</p>
+    </section>
+
+    <section class="drawer-section">
+      <h4>Facetas olfativas</h4>
+      ${facetasMarkup}
+    </section>
+
+    <section class="drawer-section">
+      <h4>Propiedades fisicoquímicas</h4>
+      <div class="drawer-meta">
+        <div class="meta-row"><span>LogP</span><strong>${material.logP || "N/D"}</strong></div>
+        <div class="meta-row"><span>Sustantividad</span><strong>${material.sustantividad || "En evaluación"}</strong></div>
+      </div>
+    </section>
+
+    <section class="drawer-section">
+      <h4>Aplicaciones recomendadas</h4>
+      <p>${material.aplicacionRecomendada || "No disponible"}</p>
+    </section>
+
+    <section class="drawer-section">
+      <h4>Comentarios técnicos</h4>
+      <p>${material.comentariosTecnicos || "Sin comentarios técnicos."}</p>
+    </section>
+  `;
+}
+
+function openDetailDrawer(material) {
+  state.selectedMaterial = material;
+  renderDetailDrawer(material);
+
+  if (detailDrawer && detailBackdrop) {
+    detailDrawer.classList.add("is-open");
+    detailBackdrop.classList.add("is-open");
+    detailDrawer.setAttribute("aria-hidden", "false");
+    detailBackdrop.hidden = false;
+  }
+}
+
+function closeDetailDrawer() {
+  if (detailDrawer && detailBackdrop) {
+    detailDrawer.classList.remove("is-open");
+    detailBackdrop.classList.remove("is-open");
+    detailDrawer.setAttribute("aria-hidden", "true");
+    detailBackdrop.hidden = true;
+  }
+
+  state.selectedMaterial = null;
+  renderMaterials();
 }
 
 searchInput.addEventListener("input", (event) => {
@@ -250,6 +385,39 @@ resetSearch.addEventListener("click", () => {
   searchInput.value = "";
   searchInput.focus();
   renderMaterials();
+});
+
+materialsGrid.addEventListener("click", (event) => {
+  const row = event.target.closest(".materials-table-row");
+
+  if (!row) {
+    return;
+  }
+
+  const materialIndex = Number(row.dataset.materialIndex || 0);
+  const materials = getFilteredMaterials();
+  const material = materials[materialIndex];
+
+  if (material) {
+    openDetailDrawer(material);
+  }
+});
+
+materialsGrid.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    const row = event.target.closest(".materials-table-row");
+
+    if (row) {
+      event.preventDefault();
+      const materialIndex = Number(row.dataset.materialIndex || 0);
+      const materials = getFilteredMaterials();
+      const material = materials[materialIndex];
+
+      if (material) {
+        openDetailDrawer(material);
+      }
+    }
+  }
 });
 
 function showLoginView() {
@@ -270,6 +438,8 @@ function showLoginView() {
 
   state.query = "";
   state.matrixRows = [];
+  state.selectedMaterial = null;
+  closeDetailDrawer();
   renderMatrixPreview();
   loadMaterials();
   closeUserMenu();
@@ -278,6 +448,7 @@ function showLoginView() {
 function showDashboardView() {
   loginScreen.classList.add("is-hidden");
   appShell.classList.remove("is-hidden");
+  closeDetailDrawer();
   closeUserMenu();
 }
 
@@ -310,6 +481,20 @@ if (demoButton) {
     showDashboardView();
   });
 }
+
+if (closeDrawerButton) {
+  closeDrawerButton.addEventListener("click", closeDetailDrawer);
+}
+
+if (detailBackdrop) {
+  detailBackdrop.addEventListener("click", closeDetailDrawer);
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeDetailDrawer();
+  }
+});
 
 if (downloadTemplateButton) {
   downloadTemplateButton.addEventListener("click", () => {
@@ -471,11 +656,11 @@ if (matrixFileInput) {
         return;
       }
 
-      state.materials = loadedMaterials;
-      state.matrixRows = loadedMaterials;
+      state.materials = loadedMaterials.map((material, index) => normalizeMaterial(material, index));
+      state.matrixRows = loadedMaterials.map((material, index) => normalizeMaterial(material, index));
       updateDashboard();
       renderMaterials();
-      renderMatrixPreview(loadedMaterials);
+      renderMatrixPreview(state.matrixRows);
 
       if (warnings.length) {
         setMatrixStatus("Matriz cargada correctamente en modo demo. La suma de facetas es menor a 100% en una o más materias primas.", "warning");
