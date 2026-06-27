@@ -558,6 +558,78 @@ h2 {
   padding: 22px;
 }
 
+.matrix-panel {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.matrix-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.file-button {
+  cursor: pointer;
+}
+
+.matrix-help {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.matrix-status {
+  min-height: 24px;
+  font-weight: 700;
+}
+
+.matrix-status.success {
+  color: var(--accent-strong);
+}
+
+.matrix-status.error {
+  color: #b3474d;
+}
+
+.matrix-status.warning {
+  color: #a96c1d;
+}
+
+.matrix-preview {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfdfc;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.matrix-table th,
+.matrix-table td {
+  border-bottom: 1px solid rgba(16, 33, 29, 0.08);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.matrix-table th {
+  background: rgba(46, 158, 116, 0.08);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.matrix-empty {
+  margin: 0;
+  padding: 16px;
+  color: var(--muted);
+}
+
 .panel-card.compact {
   padding: 20px;
 }
@@ -762,6 +834,10 @@ h2 {
 
   .auth-actions {
     flex-direction: column;
+  }
+
+  .matrix-actions {
+    width: 100%;
   }
 
   .main-content {

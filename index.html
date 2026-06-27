@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
   </head>
   <body>
     <section class="auth-screen" id="loginScreen" aria-labelledby="login-title">
@@ -168,6 +169,26 @@
               <strong id="averageIntensity">0.0</strong>
               <small>Escala sensorial 1-10</small>
             </article>
+          </section>
+
+          <section class="matrix-panel panel-card" aria-labelledby="matrix-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Gestión demo</p>
+                <h2 id="matrix-title">Gestión de Matriz de Materias Primas</h2>
+              </div>
+              <div class="matrix-actions">
+                <button class="ghost-button" type="button" id="downloadTemplateButton">Descargar plantilla</button>
+                <label class="ghost-button file-button">
+                  <input type="file" id="matrixFileInput" accept=".xlsx" hidden />
+                  Cargar matriz
+                </label>
+              </div>
+            </div>
+
+            <p class="matrix-help">Descarga una plantilla Excel y carga una matriz de materias primas en modo demo para actualizar temporalmente la biblioteca olfativa.</p>
+            <div class="matrix-status" id="matrixStatus" role="status" aria-live="polite"></div>
+            <div class="matrix-preview" id="matrixPreview"></div>
           </section>
 
           <section class="content-grid" aria-label="Panel principal">
