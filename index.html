@@ -13,7 +13,42 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <section class="auth-screen" id="loginScreen" aria-labelledby="login-title">
+      <div class="auth-card">
+        <div class="auth-brand">
+          <span class="brand-mark" aria-hidden="true">FS</span>
+          <div>
+            <p class="eyebrow">Acceso demo</p>
+            <h2 id="login-title">FloraSynthesis Olfactory Intelligence</h2>
+          </div>
+        </div>
+
+        <p class="auth-subtitle">
+          Plataforma de inteligencia olfativa para explorar materias primas, familias aromáticas y formulaciones premium.
+        </p>
+
+        <form class="auth-form" id="loginForm">
+          <label class="field">
+            <span>Usuario</span>
+            <input type="text" name="username" placeholder="Tu usuario" />
+          </label>
+
+          <label class="field">
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="••••••••" />
+          </label>
+
+          <div class="auth-actions">
+            <button class="primary-button" type="submit">Ingresar</button>
+            <button class="secondary-button" type="button" id="demoButton">Ver demo</button>
+          </div>
+
+          <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <div class="app-shell" id="appShell" hidden>
       <aside class="sidebar" aria-label="Navegacion principal">
         <a class="brand" href="#" aria-label="FloraSynthesis Olfactory Intelligence">
           <span class="brand-mark" aria-hidden="true">FS</span>

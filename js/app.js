@@ -34,6 +34,11 @@ const resetSearch = document.querySelector("#resetSearch");
 const totalMaterials = document.querySelector("#totalMaterials");
 const totalFamilies = document.querySelector("#totalFamilies");
 const averageIntensity = document.querySelector("#averageIntensity");
+const loginScreen = document.querySelector("#loginScreen");
+const appShell = document.querySelector("#appShell");
+const loginForm = document.querySelector("#loginForm");
+const authMessage = document.querySelector("#authMessage");
+const demoButton = document.querySelector("#demoButton");
 
 async function loadMaterials() {
   try {
@@ -139,5 +144,27 @@ resetSearch.addEventListener("click", () => {
   searchInput.focus();
   renderMaterials();
 });
+
+if (loginForm) {
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (authMessage) {
+      authMessage.textContent = "Acceso no habilitado en esta versión demo";
+    }
+  });
+}
+
+if (demoButton) {
+  demoButton.addEventListener("click", () => {
+    if (loginScreen) {
+      loginScreen.hidden = true;
+    }
+
+    if (appShell) {
+      appShell.hidden = false;
+    }
+  });
+}
 
 loadMaterials();
